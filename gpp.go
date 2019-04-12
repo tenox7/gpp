@@ -145,18 +145,18 @@ func plotRing(r *ring.Ring, host string, tgtnum int32, badping float64, renderer
 }
 
 func main() {
-    var f bool
-    var b float64
+    var foreground bool
+    var badPing float64
 
     flag.Usage = func() {
         errbox("Usage: \n%s host [host [...]]", os.Args[0])
     }
 
-    flag.Float64Var(&b, "t", 100, "Pings longer than this will be be more redish color")
-    flag.BoolVar(&f, "f", false, "Run in foreground, do not detach from terminal")
+    flag.Float64Var(&badPing, "t", 100, "Pings longer than this will be be more redish color")
+    flag.BoolVar(&foreground, "f", false, "Run in foreground, do not detach from terminal")
     flag.Parse()
 
-    if !f {
+    if !foreground {
         cwd, err := os.Getwd()
         if err != nil {
             errbox("Getcwd error: %s\n", err)
@@ -270,7 +270,7 @@ func main() {
             t := targets[n]
             rings[t].Value = float64(metrics.Median)
             rings[t] = rings[t].Next()
-            plotRing(rings[t], t, n, b, renderer, font)
+            plotRing(rings[t], t, n, badPing, renderer, font)
         }
         renderer.Present()
         sdl.Delay(1000)
