@@ -124,7 +124,7 @@ func plotRing(r *ring.Ring, host string, tgtnum int32, badping float64, renderer
         v, _ = x.(float64)
         if math.IsNaN(v) {
             h = panelHeight - 1
-            renderer.SetDrawColor(0xFF, 0x00, 0x00, 0x00)
+            renderer.SetDrawColor(0xFF, 0x00, 0x00, 0xFF)
             renderer.DrawLine(windowMargin+i, vs+windowMargin+panelHeight+15-h,
                 windowMargin+i, vs+windowMargin+panelHeight+15-2)
         } else if v > 0 {
@@ -134,7 +134,7 @@ func plotRing(r *ring.Ring, host string, tgtnum int32, badping float64, renderer
                 windowMargin+1+i, vs+windowMargin+panelHeight+13)
         } else {
             h = 2
-            renderer.SetDrawColor(0x00, 0xFF, 0x00, 0x00)
+            renderer.SetDrawColor(0x00, 0xFF, 0x00, 0xFF)
             renderer.DrawLine(windowMargin+i, vs+windowMargin+panelHeight+15-h,
                 windowMargin+i, vs+windowMargin+panelHeight+15-2)
         }
@@ -273,7 +273,7 @@ func main() {
             }
         }
         renderer.Clear()
-        renderer.SetDrawColor(100, 100, 100, 0x20)
+        renderer.SetDrawColor(100, 100, 100, 0xFF)
         renderer.FillRect(&sdl.Rect{0, 0, windowWidth, windowHeight})
         for i, metrics := range monitor.ExportAndClear() {
             n := int32([]byte(i)[0])
