@@ -22,7 +22,7 @@ flags:
 
 Downloads
 ---------
-Uder [Releases](https://github.com/tenox7/gpp/releases)
+Under [Releases](https://github.com/tenox7/gpp/releases)
 
 Copyright
 ---------
