@@ -3,11 +3,9 @@ Go Ping Plot
 
 ![screenshot](gpp.png)
 
-Ping plotting app.
-
 * Multi target, ping multiple hosts at once
-* Line color changes with latency
-* Multi OS, works on Windows, macOS and Linux
+* Line color changes with latency, red on timeout
+* Multi OS, works Linux, FreeBSD, macOS and Windows
 * Portable, self contained binaries
 * Written in GoLang, uses SDL2
 
