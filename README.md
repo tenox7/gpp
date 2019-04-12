@@ -20,6 +20,10 @@ flags:
     -fs - full screen mode
 ```
 
+Downloads
+---------
+Uder [Releases](https://github.com/tenox7/gpp/releases)
+
 Copyright
 ---------
 Copyright 2019 Google LLC
