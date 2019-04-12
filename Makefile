@@ -10,6 +10,10 @@ macos: statik
 windows: statik
 	CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -tags static -ldflags "-s -w -H=windowsgui" -o gpp-windows.exe gpp.go
 
+
+rpi: statik
+	CGO_ENABLED=1 CC=gcc GOOS=linux GOARCH=arm go build -o gpp-rpi gpp.go
+
 statik:
 	statik -src fonts/
 
