@@ -43,7 +43,8 @@ var (
     windowWidth  int32 = 180
     windowHeight int32 = 100
     windowMargin int32 = 5
-    panelHeight  int32 = 50
+    panelHeight  int32 = 45
+    panelSpace   int32 = 90
     panelWidth         = windowWidth - (windowMargin * 2)
     fontName           = "noto.ttf"
     fontSize     int32 = 11
@@ -94,7 +95,7 @@ func plotRing(r *ring.Ring, host string, tgtnum int32, badping float64, renderer
     var min, max, avg, lst, tot float64 = 10000.0, 0, 0, 0, 0
     var i, h int32 = 0, 0
     var txt string
-    var vs int32 = (tgtnum * 100) + 1
+    var vs int32 = (tgtnum * panelSpace) + 1
     var v float64
 
     renderer.SetDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
@@ -189,7 +190,6 @@ func main() {
     defer monitor.Stop()
 
     rings := make(map[string]*ring.Ring)
-    n := 0
     targets := flag.Args()
     for i, target := range targets {
         ipAddr, err := net.ResolveIPAddr("", target)
@@ -198,9 +198,7 @@ func main() {
         }
         monitor.AddTargetDelayed(string([]byte{byte(i)}), *ipAddr, 10*time.Millisecond*time.Duration(i))
         rings[target] = ring.New(int(panelWidth - 2))
-        n++
     }
-    windowHeight = int32(n * 100)
 
     // SDL Init
     if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
@@ -211,6 +209,7 @@ func main() {
         errbox("Failed to initialize TTF:\n %s\n", err)
     }
 
+    windowHeight = int32(len(rings)) * panelSpace
     window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, windowWidth, windowHeight, sdl.WINDOW_OPENGL)
     if err != nil {
         errbox("Failed to create window:\n %s\n", err)
