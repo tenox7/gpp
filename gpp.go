@@ -51,7 +51,7 @@ var (
 
 func errbox(format string, args ...interface{}) {
     sdl.Init(sdl.INIT_VIDEO)
-    window, _ := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 100, 100, 8)
+    window, _ := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 100, 100, sdl.WINDOW_HIDDEN)
     sdl.ShowSimpleMessageBox(10, "Error", fmt.Sprintf(format, args...), window)
     window.Destroy()
     os.Exit(1)
