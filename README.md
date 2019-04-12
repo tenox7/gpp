@@ -5,7 +5,8 @@ Go Ping Plot
 
 * Multi target, ping multiple hosts at once
 * Line color changes with latency, red on timeout
-* Multi OS, works Linux, FreeBSD, macOS and Windows
+* Multi OS, works on Linux, FreeBSD, macOS and Windows
+* Full screen mode for devices like Raspberry PI
 * Portable, self contained binaries
 * Written in GoLang, uses SDL2
 
