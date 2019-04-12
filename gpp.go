@@ -146,6 +146,7 @@ func plotRing(r *ring.Ring, host string, tgtnum int32, badping float64, renderer
 
 func main() {
     var foreground bool
+    var fullScreen bool
     var badPing float64
 
     flag.Usage = func() {
@@ -153,8 +154,11 @@ func main() {
     }
 
     flag.Float64Var(&badPing, "t", 100, "Pings longer than this will be be more redish color")
+    flag.BoolVar(&fullScreen, "fs", false, "Run in full screen mode")
     flag.BoolVar(&foreground, "f", false, "Run in foreground, do not detach from terminal")
     flag.Parse()
+
+    targets := flag.Args()
 
     if !foreground {
         cwd, err := os.Getwd()
@@ -178,27 +182,6 @@ func main() {
         errbox("Too many targets")
     }
 
-    // Ping Init
-    pinger, err := ping.New("0.0.0.0", "::")
-    if err != nil {
-        errbox("Unable to bind:\n%s\nAre you running as root?\n", err)
-    }
-    pinger.SetPayloadSize(uint16(size))
-    defer pinger.Close()
-
-    monitor := monitor.New(pinger, pingInterval, pingTimeout)
-    defer monitor.Stop()
-
-    rings := make(map[string]*ring.Ring)
-    targets := flag.Args()
-    for i, target := range targets {
-        ipAddr, err := net.ResolveIPAddr("", target)
-        if err != nil {
-            errbox("invalid target '%s':\n %s", target, err)
-        }
-        monitor.AddTargetDelayed(string([]byte{byte(i)}), *ipAddr, 10*time.Millisecond*time.Duration(i))
-        rings[target] = ring.New(int(panelWidth - 2))
-    }
 
     // SDL Init
     if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
@@ -209,12 +192,18 @@ func main() {
         errbox("Failed to initialize TTF:\n %s\n", err)
     }
 
-    windowHeight = int32(len(rings)) * targetSize
-    window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, windowWidth, windowHeight, sdl.WINDOW_OPENGL)
+    window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, windowWidth, int32(len(targets)) * targetSize, sdl.WINDOW_OPENGL)
     if err != nil {
         errbox("Failed to create window:\n %s\n", err)
     }
     defer window.Destroy()
+
+    if(fullScreen) {
+        window.SetFullscreen(sdl.WINDOW_FULLSCREEN_DESKTOP)
+    }
+
+    windowWidth, windowHeight = window.GetSize()
+    panelWidth = windowWidth - (windowMargin * 2)
 
     renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
     if err != nil {
@@ -252,6 +241,27 @@ func main() {
     font, err := ttf.OpenFont(tmp.Name(), int(fontSize))
     if err != nil {
         errbox("Failed to open font:\n %s\n", err)
+    }
+
+    // Ping Init
+    pinger, err := ping.New("0.0.0.0", "::")
+    if err != nil {
+        errbox("Unable to bind:\n%s\nAre you running as root?\n", err)
+    }
+    pinger.SetPayloadSize(uint16(size))
+    defer pinger.Close()
+
+    monitor := monitor.New(pinger, pingInterval, pingTimeout)
+    defer monitor.Stop()
+
+    rings := make(map[string]*ring.Ring)
+    for i, target := range targets {
+        ipAddr, err := net.ResolveIPAddr("", target)
+        if err != nil {
+            errbox("invalid target '%s':\n %s", target, err)
+        }
+        monitor.AddTargetDelayed(string([]byte{byte(i)}), *ipAddr, 10*time.Millisecond*time.Duration(i))
+        rings[target] = ring.New(int(panelWidth - 2))
     }
 
     // Main Loop
