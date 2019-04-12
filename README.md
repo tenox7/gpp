@@ -13,10 +13,11 @@ Go Ping Plot
 Usage
 -----
 ```
-gpp host [host [...]]
+gpp [flags] host [host [...]]
 
 flags:
-    -t - threshold for "bad ping" - line color will be more reddish  
+    -t  - threshold for "bad ping" - line color will be more reddish
+    -fs - full screen mode
 ```
 
 Copyright
