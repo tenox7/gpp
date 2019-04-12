@@ -44,7 +44,7 @@ var (
     windowHeight int32 = 100
     windowMargin int32 = 5
     panelHeight  int32 = 45
-    panelSpace   int32 = 90
+    targetSize   int32 = 90
     panelWidth         = windowWidth - (windowMargin * 2)
     fontName           = "noto.ttf"
     fontSize     int32 = 11
@@ -95,7 +95,7 @@ func plotRing(r *ring.Ring, host string, tgtnum int32, badping float64, renderer
     var min, max, avg, lst, tot float64 = 10000.0, 0, 0, 0, 0
     var i, h int32 = 0, 0
     var txt string
-    var vs int32 = (tgtnum * panelSpace) + 1
+    var vs int32 = (tgtnum * targetSize) + 1
     var v float64
 
     renderer.SetDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
@@ -209,7 +209,7 @@ func main() {
         errbox("Failed to initialize TTF:\n %s\n", err)
     }
 
-    windowHeight = int32(len(rings)) * panelSpace
+    windowHeight = int32(len(rings)) * targetSize
     window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, windowWidth, windowHeight, sdl.WINDOW_OPENGL)
     if err != nil {
         errbox("Failed to create window:\n %s\n", err)
