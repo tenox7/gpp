@@ -161,7 +161,6 @@ func main() {
     flag.BoolVar(&foreground, "f", false, "Run in foreground, do not detach from terminal")
     flag.Parse()
 
-
     if !foreground {
         cwd, err := os.Getwd()
         if err != nil {
@@ -178,13 +177,12 @@ func main() {
         os.Exit(0)
     }
 
-    if na := flag.NArg(); na == 0 {
-        flag.Usage()
-    } else if na > int(^byte(0)) {
-        errbox("Too many targets")
-    }
-
     targets := flag.Args()
+    if  len(targets) < 1 {
+        errbox("No targets specified")
+    } else if len(targets) > int(^byte(0)) {
+        errbox("Too many targets specified")
+    }
 
 	if len(bgColor) == 6 {
 		n, err := fmt.Sscanf(bgColor, "%2x%2x%2x", &bgr, &bgg, &bgb)
