@@ -48,6 +48,7 @@ var (
     panelWidth         = windowWidth - (windowMargin * 2)
     fontName           = "noto.ttf"
     fontSize     int32 = 11
+    bgr,bgg,bgb  uint8 = 100, 100, 100
 )
 
 func errbox(format string, args ...interface{}) {
@@ -147,6 +148,7 @@ func plotRing(r *ring.Ring, host string, tgtnum int32, badping float64, renderer
 func main() {
     var foreground bool
     var fullScreen bool
+    var bgColor string
     var badPing float64
 
     flag.Usage = func() {
@@ -155,10 +157,10 @@ func main() {
 
     flag.Float64Var(&badPing, "t", 100, "Pings longer than this will be be more redish color")
     flag.BoolVar(&fullScreen, "fs", false, "Run in full screen mode")
+    flag.StringVar(&bgColor, "bg", "", "Background Color in Hex RRGGBB")
     flag.BoolVar(&foreground, "f", false, "Run in foreground, do not detach from terminal")
     flag.Parse()
 
-    targets := flag.Args()
 
     if !foreground {
         cwd, err := os.Getwd()
@@ -182,6 +184,15 @@ func main() {
         errbox("Too many targets")
     }
 
+    targets := flag.Args()
+
+	if len(bgColor) == 6 {
+		n, err := fmt.Sscanf(bgColor, "%2x%2x%2x", &bgr, &bgg, &bgb)
+		if err != nil || n != 3 {
+			errbox("Unable to parse bg background color")
+		}
+		
+	}
 
     // SDL Init
     if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
@@ -273,7 +284,7 @@ func main() {
             }
         }
         renderer.Clear()
-        renderer.SetDrawColor(100, 100, 100, 0xFF)
+        renderer.SetDrawColor(bgr, bgb, bgb, 0xFF)
         renderer.FillRect(&sdl.Rect{0, 0, windowWidth, windowHeight})
         for i, metrics := range monitor.ExportAndClear() {
             n := int32([]byte(i)[0])
