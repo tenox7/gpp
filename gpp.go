@@ -48,7 +48,8 @@ var (
     panelWidth         = windowWidth - (windowMargin * 2)
     fontName           = "noto.ttf"
     fontSize     int32 = 11
-    bgr,bgg,bgb  uint8 = 100, 100, 100
+    fgr,fgg,fgb  uint8 = 0xFF, 0xFF, 0xFF
+    bgr,bgg,bgb  uint8 = 0x64, 0x64, 0x64
 )
 
 func errbox(format string, args ...interface{}) {
@@ -92,16 +93,16 @@ func drawText(renderer *sdl.Renderer, font *ttf.Font, color sdl.Color, x int32, 
     return w, h
 }
 
-func plotRing(r *ring.Ring, host string, tgtnum int32, badping float64, renderer *sdl.Renderer, font *ttf.Font) {
+func plotRing(r *ring.Ring, host string, tgtnum int32, badping float64, renderer *sdl.Renderer, font *ttf.Font, fg sdl.Color) {
     var min, max, avg, lst, tot float64 = 10000.0, 0, 0, 0, 0
     var i, h int32 = 0, 0
     var txt string
     var vs int32 = (tgtnum * targetSize) + 1
     var v float64
 
-    renderer.SetDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
+    renderer.SetDrawColor(fg.R, fg.G, fg.B, fg.A)
     renderer.DrawRect(&sdl.Rect{windowMargin, vs + windowMargin + 15, windowWidth - (windowMargin * 2), panelHeight})
-    drawText(renderer, font, sdl.Color{0xFF, 0xFF, 0xFF, 0xFF}, windowMargin, vs+windowMargin-3, host)
+    drawText(renderer, font, fg, windowMargin, vs+windowMargin-3, host)
 
     r.Do(func(x interface{}) {
         v, _ = x.(float64)
@@ -142,13 +143,14 @@ func plotRing(r *ring.Ring, host string, tgtnum int32, badping float64, renderer
         i++
     })
     txt = fmt.Sprintf("L=%.1f M=%.1f A=%.1f", lst, max, avg)
-    drawText(renderer, font, sdl.Color{0xFF, 0xFF, 0xFF, 0xFF}, windowMargin, vs+windowMargin+panelHeight+15, txt)
+    drawText(renderer, font, fg, windowMargin, vs+windowMargin+panelHeight+15, txt)
 }
 
 func main() {
     var foreground bool
     var fullScreen bool
     var bgColor string
+    var fgColor string
     var badPing float64
 
     flag.Usage = func() {
@@ -158,6 +160,7 @@ func main() {
     flag.Float64Var(&badPing, "t", 100, "Pings longer than this will be be more redish color")
     flag.BoolVar(&fullScreen, "fs", false, "Run in full screen mode")
     flag.StringVar(&bgColor, "bg", "", "Background Color in Hex RRGGBB")
+    flag.StringVar(&fgColor, "fg", "", "Border and Text Color in Hex RRGGBB")
     flag.BoolVar(&foreground, "f", false, "Run in foreground, do not detach from terminal")
     flag.Parse()
 
@@ -189,7 +192,13 @@ func main() {
 		if err != nil || n != 3 {
 			errbox("Unable to parse bg background color")
 		}
-		
+	}
+
+	if len(fgColor) == 6 {
+		n, err := fmt.Sscanf(fgColor, "%2x%2x%2x", &fgr, &fgg, &fgb)
+		if err != nil || n != 3 {
+			errbox("Unable to parse fg foreground color")
+		}
 	}
 
     // SDL Init
@@ -289,7 +298,7 @@ func main() {
             t := targets[n]
             rings[t].Value = float64(metrics.Median)
             rings[t] = rings[t].Next()
-            plotRing(rings[t], t, n, badPing, renderer, font)
+            plotRing(rings[t], t, n, badPing, renderer, font, sdl.Color{fgr,fgg,fgb,0xFF})
         }
         renderer.Present()
         sdl.Delay(1000)
