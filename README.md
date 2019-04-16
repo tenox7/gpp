@@ -17,7 +17,9 @@ gpp [flags] host [host [...]]
 
 flags:
     -t  - threshold for "bad ping" - line color will be more reddish
-    -fs - full screen mode
+    -fs - full screen mode (eg. for Raspberry PI)
+    -fg - border and text color in hex rgb
+    -bg - background color in hex rgb
 ```
 
 Downloads
