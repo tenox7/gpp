@@ -36,20 +36,20 @@ import (
 )
 
 var (
-    pingInterval       = 1 * time.Second
-    pingTimeout        = 4 * time.Second
-    size         uint  = 56
-    title              = "GoPingPlot"
-    windowWidth  int32 = 180
-    windowHeight int32 = 100
-    windowMargin int32 = 5
-    panelHeight  int32 = 45
-    targetSize   int32 = 90
-    panelWidth         = windowWidth - (windowMargin * 2)
-    fontName           = "noto.ttf"
-    fontSize     int32 = 11
-    fgr,fgg,fgb  uint8 = 0xFF, 0xFF, 0xFF
-    bgr,bgg,bgb  uint8 = 0x64, 0x64, 0x64
+    pingInterval        = 1 * time.Second
+    pingTimeout         = 4 * time.Second
+    size          uint  = 56
+    title               = "GoPingPlot"
+    windowWidth   int32 = 180
+    windowHeight  int32 = 100
+    windowMargin  int32 = 5
+    panelHeight   int32 = 45
+    targetSize    int32 = 90
+    panelWidth          = windowWidth - (windowMargin * 2)
+    fontName            = "noto.ttf"
+    fontSize      int32 = 11
+    fgr, fgg, fgb uint8 = 0xFF, 0xFF, 0xFF
+    bgr, bgg, bgb uint8 = 0x64, 0x64, 0x64
 )
 
 func errbox(format string, args ...interface{}) {
@@ -181,25 +181,25 @@ func main() {
     }
 
     targets := flag.Args()
-    if  len(targets) < 1 {
+    if len(targets) < 1 {
         errbox("No targets specified")
     } else if len(targets) > int(^byte(0)) {
         errbox("Too many targets specified")
     }
 
-	if len(bgColor) == 6 {
-		n, err := fmt.Sscanf(bgColor, "%2x%2x%2x", &bgr, &bgg, &bgb)
-		if err != nil || n != 3 {
-			errbox("Unable to parse bg background color")
-		}
-	}
+    if len(bgColor) == 6 {
+        n, err := fmt.Sscanf(bgColor, "%2x%2x%2x", &bgr, &bgg, &bgb)
+        if err != nil || n != 3 {
+            errbox("Unable to parse bg background color")
+        }
+    }
 
-	if len(fgColor) == 6 {
-		n, err := fmt.Sscanf(fgColor, "%2x%2x%2x", &fgr, &fgg, &fgb)
-		if err != nil || n != 3 {
-			errbox("Unable to parse fg foreground color")
-		}
-	}
+    if len(fgColor) == 6 {
+        n, err := fmt.Sscanf(fgColor, "%2x%2x%2x", &fgr, &fgg, &fgb)
+        if err != nil || n != 3 {
+            errbox("Unable to parse fg foreground color")
+        }
+    }
 
     // SDL Init
     if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
@@ -210,13 +210,13 @@ func main() {
         errbox("Failed to initialize TTF:\n %s\n", err)
     }
 
-    window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, windowWidth, int32(len(targets)) * targetSize, sdl.WINDOW_OPENGL)
+    window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, windowWidth, int32(len(targets))*targetSize, sdl.WINDOW_OPENGL)
     if err != nil {
         errbox("Failed to create window:\n %s\n", err)
     }
     defer window.Destroy()
 
-    if(fullScreen) {
+    if fullScreen {
         window.SetFullscreen(sdl.WINDOW_FULLSCREEN_DESKTOP)
     }
 
@@ -282,7 +282,25 @@ func main() {
         rings[target] = ring.New(int(panelWidth - 2))
     }
 
-    // Main Loop
+    // Render Loop
+    go func() {
+        for {
+            //renderer.Clear()
+            renderer.SetDrawColor(bgr, bgb, bgb, 0xFF)
+            renderer.FillRect(&sdl.Rect{0, 0, windowWidth, windowHeight})
+            for i, metrics := range monitor.ExportAndClear() {
+                n := int32([]byte(i)[0])
+                t := targets[n]
+                rings[t].Value = float64(metrics.Median)
+                rings[t] = rings[t].Next()
+                plotRing(rings[t], t, n, badPing, renderer, font, sdl.Color{fgr, fgg, fgb, 0xFF})
+            }
+            renderer.Present()
+            time.Sleep(pingInterval)
+        }
+    }()
+
+    // Event Loop
     for {
         for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
             switch event.(type) {
@@ -290,17 +308,6 @@ func main() {
                 os.Exit(0)
             }
         }
-        renderer.Clear()
-        renderer.SetDrawColor(bgr, bgb, bgb, 0xFF)
-        renderer.FillRect(&sdl.Rect{0, 0, windowWidth, windowHeight})
-        for i, metrics := range monitor.ExportAndClear() {
-            n := int32([]byte(i)[0])
-            t := targets[n]
-            rings[t].Value = float64(metrics.Median)
-            rings[t] = rings[t].Next()
-            plotRing(rings[t], t, n, badPing, renderer, font, sdl.Color{fgr,fgg,fgb,0xFF})
-        }
-        renderer.Present()
-        sdl.Delay(1000)
+        sdl.Delay(20)
     }
 }
