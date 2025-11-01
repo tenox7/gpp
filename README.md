@@ -1,3 +1,7 @@
+THIS PROJECT IS NOW RETIRED AND REPLACED BY
+https://github.com/tenox7/sng
+
+
 Go Ping Plot
 ============
 
